@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
  
 public class GameManager : MonoBehaviour
@@ -22,6 +23,9 @@ public class GameManager : MonoBehaviour
     
     [SerializeField]
     private float xInput;
+    
+    [SerializeField]
+    private GameObject camera;
  
     public static GameManager instance;
  
@@ -29,6 +33,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         instance = this;
+
+        camera = Camera.main.gameObject;
+        CameraBehindCueBall();
+        
         SetBall(BallColor.White, 0);
         SetBall(BallColor.Red, 1);
         SetBall(BallColor.Yellow, 2);
@@ -43,6 +51,8 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         RotateBall();
+        if(Input.GetKeyDown(KeyCode.Space))
+            ShootBall();
     }
  
     private void SetBall(BallColor col, int i)
@@ -59,5 +69,20 @@ public class GameManager : MonoBehaviour
         xInput = Input.GetAxis("Horizontal");
         cueBall.transform.Rotate(new Vector3(0f,xInput/20f,0f));
         
+    }
+
+    private void ShootBall()
+    {
+        camera.transform.parent = null;
+        Rigidbody rb = cueBall.GetComponent<Rigidbody>();
+        rb.AddRelativeForce(Vector3.forward * 50, ForceMode.Impulse);
+        ballLine.SetActive(false);
+    }
+
+    private void CameraBehindCueBall()
+    {
+        camera.transform.parent = cueBall.transform;
+        camera.transform.position = cueBall.transform.position
+                                    + new Vector3(0f, 7f, -10f);
     }
 }
